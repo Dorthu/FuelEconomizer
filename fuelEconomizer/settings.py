@@ -18,9 +18,11 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 # See https://docs.djangoproject.com/en/1.7/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# SECURITY UNWARNING: This is the dev key, the real key isn't in source control!
 SECRET_KEY = '7%)qe^#2&$)0ev&#mxu2w-v+4l%t^!^d9s71ie&l78*zjfgwgw'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# SECURITY UNWARNING: I won't!
 DEBUG = True
 
 TEMPLATE_DEBUG = True
@@ -120,3 +122,10 @@ CORS_ALLOW_HEADERS = (
 )
 
 CORS_PREFLIGHT_MAX_AGE = 86400
+
+
+# Import production settings
+try:
+    from production_settings import *
+except:
+    pass
