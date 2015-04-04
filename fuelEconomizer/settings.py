@@ -126,6 +126,6 @@ CORS_PREFLIGHT_MAX_AGE = 86400
 
 # Import production settings
 try:
-    from production_settings import *
+    from .production_settings import *
 except:
     pass
