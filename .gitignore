@@ -1,3 +1,4 @@
 fuelEconomizer/prod_settings.py
 *.pyc
 .idea
+db.sqlite3
