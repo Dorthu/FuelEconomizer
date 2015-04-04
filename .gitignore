@@ -1,1 +1,3 @@
 fuelEconomizer/prod_settings.py
+*.pyc
+.idea
