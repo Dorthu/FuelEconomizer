@@ -3,12 +3,15 @@ from webservices import models
 from django.http import HttpResponse
 from django.core import serializers
 import json
+from .application_views import doAuth
 
+def getUser(request):
 
-def getUser(request, token):
-    session = get_object_or_404(models.Session, token=token)
-    user = session.user.getJSON()
-    return HttpResponse(user)
+    if not doAuth(request):
+        return HttpResponse(status=401)
+
+    user = request.session.user
+    return HttpResponse(json.dumps(user.toJSON()))
 
 
 def login(request):

@@ -31,8 +31,12 @@ class User(models.Model):
     def __str__(self):
         return self.name
 
-    def getJSON(self):
-        return json.dumps({"name": self.name, "email": self.email})
+    def toJSON(self):
+        return {
+            'name':                 self.name,
+            'email':                self.email,
+            'needsPasswordReset':   False
+        }
 
 
 class Session(models.Model):

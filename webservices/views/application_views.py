@@ -20,7 +20,11 @@ def doAuth(request):
 
     logger.info("Token is ", token)
 
-    session = models.Session.objects.get(token=token)
+    session = False
+    try:
+        session = models.Session.objects.get(token=token)
+    except:
+        return False
 
     logger.info("Got a session")
 
@@ -38,7 +42,7 @@ def getVehicles(request):
         return HttpResponse("Bad method", status=400)
 
     if not doAuth(request):
-        return HttpResponse(status=403)
+        return HttpResponse(status=401)
 
     logger.info("Got user as ", request.session.user)
 
@@ -54,7 +58,7 @@ def addGasStop(request):
         return HttpResponse("Bad Method", status=400)
 
     if not doAuth(request):
-        return  HttpResponse(status=403)
+        return  HttpResponse(status=401)
 
     info = json.loads(request.body.decode('utf-8'))
 
