@@ -4,6 +4,9 @@ from django.http import HttpResponse
 from django.core import serializers
 import json
 from .application_views import doAuth
+import hashlib
+import base64
+import uuid
 
 def getUser(request):
 
@@ -26,9 +29,21 @@ def login(request):
     password= info['password']
 
     try:
-        user = models.User.objects.get(email=userEmail, password_hash=password)
+        user = models.User.objects.get(email=userEmail)
     except:
         return HttpResponse(json.dumps({"responseType": "errorResponse", "errorMessage": "Invalid User/Password"}))
+
+    if user.password_salt == 'CHANGEME':    # Old password authentication - not encrypted, this is going as soon as all accounts are fixed
+        if user.password_hash != password:
+            return HttpResponse(json.dumps({"responseType": 'errorResponse', 'errorMessage': 'Invalid User/Password'}))
+    else:   # Real password authentication
+        t_sha = hashlib.sha512();
+        t_sha.update((password + user.password_salt).encode('utf-8'))
+
+        if not user.password_hash == t_sha.hexdigest():
+            return HttpResponse(json.dumps({"responseType": 'errorResponse', 'errorMessage': 'Invalid User/Password'}))
+
+    # If we made it here, our creds checked out
     session = models.Session()
     session.user = user
     return HttpResponse(json.dumps({"responseType":"loginResponse", "token":session.generateToken(user)}))
@@ -37,3 +52,37 @@ def login(request):
 def getSession(token):
     return models.Session.objects.get(token=token)
 
+def resetPassword(request):
+
+    if not doAuth(request):
+        return HttpResponse(status=401)
+
+    try:
+        info = json.loads(request.body.decode('utf-8'))
+    except:
+        return HttpResponse(status=400)
+
+    if not info:
+        return HttpResponse(status=400)
+
+    user = request.session.user
+
+    if not info['newPassword'] == info['confirmNewPassword']:
+        return HttpResponse("{'responseType':'errorResponse', 'errorMessage':'Passwords don't match'}", status=400)
+
+    # Generate the new password hash/salt
+    user.password_salt = uuid.uuid4().hex
+    password = info['newPassword']
+    t_sha = hashlib.sha512();
+    t_sha.update((password + user.password_salt).encode('utf-8'))
+    user.password_hash = t_sha.hexdigest()
+
+    # Save it
+    user.save()
+
+    # Invalidate all sessions
+    models.Session.objects.filter(user=user).delete()
+
+    # Return a new session token as if completing a login
+    request.session = models.Session(user=user)
+    return HttpResponse(json.dumps({"responseType":"loginResponse", "token":request.session.generateToken(user)}))

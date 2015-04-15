@@ -27,6 +27,7 @@ class User(models.Model):
     password_hash = models.CharField(max_length=75)
     password_salt = models.CharField(max_length=15)
     name = models.CharField(max_length=75)
+    needs_password_reset = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -35,7 +36,7 @@ class User(models.Model):
         return {
             'name':                 self.name,
             'email':                self.email,
-            'needsPasswordReset':   False
+            'needsPasswordReset':   self.needs_password_reset
         }
 
 
