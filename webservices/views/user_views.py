@@ -77,6 +77,9 @@ def resetPassword(request):
     t_sha.update((password + user.password_salt).encode('utf-8'))
     user.password_hash = t_sha.hexdigest()
 
+    # We don't need to reset our password anymore
+    user.needs_password_reset = False
+
     # Save it
     user.save()
 
