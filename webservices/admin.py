@@ -19,7 +19,7 @@ class VehicleAdminObj(admin.ModelAdmin):
 
 
 class GasStopAdminObj(admin.ModelAdmin):
-    field = ['vehicle', 'date', 'latitude', 'longitude', 'odometer', 'fuel_purchased', 'price']
+    fields = ('vehicle', 'date', ('latitude', 'longitude'), 'odometer', ('fuel_purchased', 'price'))
 
 
 class SessionAdminObj(admin.ModelAdmin):

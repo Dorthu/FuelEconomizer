@@ -1,7 +1,6 @@
 from django.db import models
-import json
 from datetime import datetime
-import uuid;
+import uuid
 
 # Automobile Metadata
 class Make(models.Model):
@@ -102,6 +101,18 @@ class GasStop(models.Model):
     def __str__(self):
         return str(self.vehicle) + " : Gas Stop at " + str(self.odometer) + " miles"
 
+    def __getattr__(self, attr):
+        if attr == 'price_per_gallon':
+            return float(self.price) / float(self.fuel_purchased)
+        elif attr == 'miles_per_gallon':
+            prev_stop = GasStop.objects.filter(vehicle=self.vehicle).filter(date__lt=self.date)[0]
+            if prev_stop:
+                return (float(self.odometer) - prev_stop.odometer) / float(self.fuel_purchased)
+            return "Not Enough Data"
+        else:
+            raise AttributeError
+
+
     def toJSON(self):
         return { 'vehicle' :        self.vehicle.toJSON(),
                  'datetime' :       str(self.date),
@@ -109,5 +120,7 @@ class GasStop(models.Model):
                  'lon' :            self.longitude,
                  'odometer' :       self.odometer,
                  'fuelPurchased':   self.fuel_purchased,
-                 'pricePaid' :      self.price
+                 'pricePaid' :      self.price,
+                 'pricePerGallon':  self.price_per_gallon,
+                 'milesPerGallon':  self.miles_per_gallon
                 }
