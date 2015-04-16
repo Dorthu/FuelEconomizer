@@ -18,3 +18,7 @@ for features coming soon!  And if you think of something I didn't, be sure to su
 
 That's fine, I wrote a mobile-focused frontend [over here](https://github.com/Dorthu/EconomizerWeb) which should get you 
 started!  At present, registration is by request only, and not self-serve (message me and I'll get you set up).
+
+## License
+
+Fuel Economizer is licensed under the GNU GPL 3. See COPYING for the full text of the license.
