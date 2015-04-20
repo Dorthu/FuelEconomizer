@@ -23,8 +23,8 @@ class Model(models.Model):
 class User(models.Model):
     #User Fields
     email = models.EmailField(max_length=75)
-    password_hash = models.CharField(max_length=75)
-    password_salt = models.CharField(max_length=15)
+    password_hash = models.TextField()
+    password_salt = models.TextField()
     name = models.CharField(max_length=75)
     needs_password_reset = models.BooleanField(default=False)
 
