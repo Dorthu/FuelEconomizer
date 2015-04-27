@@ -105,7 +105,11 @@ class GasStop(models.Model):
         if attr == 'price_per_gallon':
             return float(self.price) / float(self.fuel_purchased)
         elif attr == 'miles_per_gallon':
-            prev_stop = GasStop.objects.filter(vehicle=self.vehicle).filter(date__lt=self.date)[0]
+            prev_stop = False
+            try:
+                prev_stop = GasStop.objects.filter(vehicle=self.vehicle).filter(date__lt=self.date)[0]
+            except:
+                pass
             if prev_stop:
                 return (float(self.odometer) - prev_stop.odometer) / float(self.fuel_purchased)
             return "Not Enough Data"
