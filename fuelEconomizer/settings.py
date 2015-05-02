@@ -40,6 +40,7 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
+    'django_crontab',
     'webservices',
 )
 
@@ -123,6 +124,10 @@ CORS_ALLOW_HEADERS = (
 
 CORS_PREFLIGHT_MAX_AGE = 86400
 
+# These are a list of all cron jobs and when they are to run
+CRONJOBS = [
+    ('0 0 * * 0', 'webservices.crons.cleanup_session')
+]
 
 # Import production settings
 try:

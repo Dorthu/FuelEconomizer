@@ -41,6 +41,11 @@ def doAuth(request):
     if session:
         logger.info("User is ", session.user)
         request.session = session
+
+        #update last_login
+        session.last_login = datetime.date.today()
+        session.save()
+
         return True
 
     logger.info("No session no error")
@@ -105,12 +110,13 @@ def addGasStop(request):
     except:
         pass
 
-    if prevGasStop:
-        print("Previous odometer is "+str(prevGasStop.odometer)+" and current is "+gasStop.odometer)
-
-    if prevGasStop and not float(gasStop.odometer) > prevGasStop.odometer:
-        return HttpResponse(json.dumps(makeErrorResponse("Previous odometer reading was "+str(prevGasStop.odometer)+" - \
-                you can't turn your odometer back!")), status=400)
+    ### This part works fine here, but not on the prod server for some reason?  It fails silently, worst of all
+#    if prevGasStop:
+#        print("Previous odometer is "+str(prevGasStop.odometer)+" and current is "+gasStop.odometer)
+#
+#    if prevGasStop and not float(gasStop.odometer) > prevGasStop.odometer:
+#        return HttpResponse(json.dumps(makeErrorResponse("Previous odometer reading was "+str(prevGasStop.odometer)+" - \
+#                you can't turn your odometer back!")), status=400)
 
     # Everything checks out - let's do it!
     gasStop.save()
