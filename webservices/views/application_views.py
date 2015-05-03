@@ -106,7 +106,7 @@ def addGasStop(request):
     # If this vehicle had a previous gas stop, make sure the odometer is incrementing - no turning it back
     prevGasStop = False
     try:
-        prevGasStop = models.GasStop.objects.filter(vehicle=gasStop.vehicle).filter(date__lt=gasStop.date)[0]
+        prevGasStop = models.GasStop.objects.filter(vehicle=gasStop.vehicle).filter(date__lt=gasStop.date).order_by('-date')[0]
     except:
         pass
 

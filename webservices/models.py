@@ -107,7 +107,7 @@ class GasStop(models.Model):
         elif attr == 'miles_per_gallon':
             prev_stop = False
             try:
-                prev_stop = GasStop.objects.filter(vehicle=self.vehicle).filter(date__lt=self.date)[0]
+                prev_stop = GasStop.objects.filter(vehicle=self.vehicle).filter(date__lt=self.date).order_by('-date')[0]
             except:
                 pass
             if prev_stop:
