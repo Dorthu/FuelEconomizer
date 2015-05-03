@@ -3,8 +3,8 @@ from webservices import models
 from webservices import util
 from django.http import HttpResponse
 import logging
-import datetime
 import json
+from django.utils import timezone
 
 #grab out logger
 logger = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ def doAuth(request):
         request.session = session
 
         #update last_login
-        session.last_login = datetime.date.today()
+        session.last_login = timezone.now()
         session.save()
 
         return True
@@ -83,7 +83,7 @@ def addGasStop(request):
     gasStop = models.GasStop()
 
     gasStop.vehicle = vehicle
-    gasStop.date = datetime.datetime.now()
+    gasStop.date = timezone.now()
     gasStop.fuel_purchased = info['gallonsPurchased']
     gasStop.odometer = info['odometer']
     gasStop.price = info['pricePaid']
@@ -110,13 +110,12 @@ def addGasStop(request):
     except:
         pass
 
-    ### This part works fine here, but not on the prod server for some reason?  It fails silently, worst of all
-#    if prevGasStop:
-#        print("Previous odometer is "+str(prevGasStop.odometer)+" and current is "+gasStop.odometer)
-#
-#    if prevGasStop and not float(gasStop.odometer) > prevGasStop.odometer:
-#        return HttpResponse(json.dumps(makeErrorResponse("Previous odometer reading was "+str(prevGasStop.odometer)+" - \
-#                you can't turn your odometer back!")), status=400)
+    if prevGasStop:
+        print("Previous odometer is "+str(prevGasStop.odometer)+" and current is "+str(gasStop.odometer))
+
+    if prevGasStop and not float(gasStop.odometer) > prevGasStop.odometer:
+        return HttpResponse(json.dumps(makeErrorResponse("Previous odometer reading was "+str(prevGasStop.odometer)+" - \
+                you can't turn your odometer back!")), status=400)
 
     # Everything checks out - let's do it!
     gasStop.save()
