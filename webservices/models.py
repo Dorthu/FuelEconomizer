@@ -75,12 +75,13 @@ class Vehicle(models.Model):
         return str(self.owner) + "'s " + str(self.model)
 
     def toJSON(self):
-        return { 'owner':   str(self.owner),
-                            'model':   str(self.model),
-                            'default': str(self.default),
-                            'display': str(self),
-                            'vid' :    self.pk
-                        }
+        return {
+            'owner':   str(self.owner),
+            'model':   str(self.model),
+            'default': str(self.default),
+            'display': str(self),
+            'vid' :    self.pk
+        }
 
 
 # Fuel Usage Data
@@ -118,13 +119,14 @@ class GasStop(models.Model):
 
 
     def toJSON(self):
-        return { 'vehicle' :        self.vehicle.toJSON(),
-                 'datetime' :       str(self.date),
-                 'lat' :            self.latitude,
-                 'lon' :            self.longitude,
-                 'odometer' :       self.odometer,
-                 'fuelPurchased':   self.fuel_purchased,
-                 'pricePaid' :      self.price,
-                 'pricePerGallon':  self.price_per_gallon,
-                 'milesPerGallon':  self.miles_per_gallon
-                }
+        return {
+            'vehicle' :        self.vehicle.toJSON(),
+            'datetime' :       str(self.date),
+            'lat' :            str(self.latitude),
+            'lon' :            str(self.longitude),
+            'odometer' :       self.odometer,
+            'fuelPurchased':   str(self.fuel_purchased),
+            'pricePaid' :      str(self.price),
+            'pricePerGallon':  str(self.price_per_gallon),
+            'milesPerGallon':  str(self.miles_per_gallon)
+        }

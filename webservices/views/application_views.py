@@ -67,14 +67,20 @@ def getVehicles(request):
                                     'vehicles' :        util.makeArray(my_vehicles)
                                     }))
 
+def gasStop(request):
+    if not doAuth(request):
+        return HttpResponse(status=401)
+
+    print("Request to /gasStop using "+request.method)
+
+    if request.method == "POST":
+        return addGasStop(request)
+    elif request.method == "GET":
+        return getGasStops(request)
+    else:
+        return HttpResponse(status=405)
 
 def addGasStop(request):
-    if not request.method == "POST":
-        return HttpResponse("Bad Method", status=400)
-
-    if not doAuth(request):
-        return  HttpResponse(status=401)
-
     info = json.loads(request.body.decode('utf-8'))
 
     vehicle = get_object_or_404(models.Vehicle, pk=info['vehicle'], owner=request.session.user)
@@ -124,3 +130,17 @@ def addGasStop(request):
                             'responseType' : 'gasStopAddedResponse',
                             'result' : gasStop.toJSON()
                         }))
+
+def getGasStops(request):
+    total = int(request.GET['count']) if 'count' in request.GET else 10
+
+    # Arbitrary limit is arbitrary
+    if total > 10:
+        total=10
+
+    results = models.GasStop.objects.filter(vehicle__owner=request.session.user).order_by('-date')[:total]
+
+    return HttpResponse(json.dumps({
+        'responseType': 'gasStopsResponse',
+        'values' : util.makeArray(results)
+    }))
