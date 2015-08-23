@@ -3,16 +3,13 @@ from webservices import models
 from django.http import HttpResponse
 from django.core import serializers
 import json
-from .application_views import doAuth
+from .view_decorators import requires_authentication
 import hashlib
 import base64
 import uuid
 
+@requires_authentication
 def getUser(request):
-
-    if not doAuth(request):
-        return HttpResponse(status=401)
-
     user = request.session.user
     return HttpResponse(json.dumps(user.toJSON()))
 
@@ -52,11 +49,8 @@ def login(request):
 def getSession(token):
     return models.Session.objects.get(token=token)
 
+@requires_authentication
 def resetPassword(request):
-
-    if not doAuth(request):
-        return HttpResponse(status=401)
-
     try:
         info = json.loads(request.body.decode('utf-8'))
     except:
@@ -73,7 +67,7 @@ def resetPassword(request):
     # Generate the new password hash/salt
     user.password_salt = uuid.uuid4().hex
     password = info['newPassword']
-    t_sha = hashlib.sha512();
+    t_sha = hashlib.sha512()
     t_sha.update((password + user.password_salt).encode('utf-8'))
     user.password_hash = t_sha.hexdigest()
 

@@ -5,8 +5,10 @@ from django.http import HttpResponse
 import logging
 import json
 from django.utils import timezone
+from .view_decorators import requires_authentication
+from datetime import datetime
 
-#grab out logger
+#grab our logger
 logger = logging.getLogger(__name__)
 
 def makeErrorResponse(errorMessage):
@@ -15,49 +17,10 @@ def makeErrorResponse(errorMessage):
         'errorMessage': errorMessage
     }
 
-'''
- This function does a bit of "magic" - it checks the HTTP_AUTHORIZATION sent in with the request and validates the
- session, then drops the session into request.session and returns True.  If you call this and it returns True, you
- can safely assume that request.session is set and has a valid object matching the user who sent the request.  Yes,
- this is "spooky action at a distance," but it makes validation so clean and simple..I can't stop myself.
-'''
-def doAuth(request):
-
-    if not 'HTTP_AUTHORIZATION' in request.META:
-        return False
-
-    token = request.META['HTTP_AUTHORIZATION']
-
-    logger.info("Token is ", token)
-
-    session = False
-    try:
-        session = models.Session.objects.get(token=token)
-    except:
-        return False
-
-    logger.info("Got a session")
-
-    if session:
-        logger.info("User is ", session.user)
-        request.session = session
-
-        #update last_login
-        session.last_login = timezone.now()
-        session.save()
-
-        return True
-
-    logger.info("No session no error")
-    return False
-
-
+@requires_authentication
 def getVehicles(request):
     if not request.method == "GET":
         return HttpResponse("Bad method", status=400)
-
-    if not doAuth(request):
-        return HttpResponse(status=401)
 
     logger.info("Got user as ", request.session.user)
 
@@ -67,10 +30,8 @@ def getVehicles(request):
                                     'vehicles' :        util.makeArray(my_vehicles)
                                     }))
 
+@requires_authentication
 def gasStop(request):
-    if not doAuth(request):
-        return HttpResponse(status=401)
-
     print("Request to /gasStop using "+request.method)
 
     if request.method == "POST":
@@ -80,6 +41,7 @@ def gasStop(request):
     else:
         return HttpResponse(status=405)
 
+#From gasStop POST
 def addGasStop(request):
     info = json.loads(request.body.decode('utf-8'))
 
@@ -131,6 +93,7 @@ def addGasStop(request):
                             'result' : gasStop.toJSON()
                         }))
 
+#From gasStop GET
 def getGasStops(request):
     total = int(request.GET['count']) if 'count' in request.GET else 10
 
@@ -144,3 +107,39 @@ def getGasStops(request):
         'responseType': 'gasStopsResponse',
         'values' : util.makeArray(results)
     }))
+
+@requires_authentication
+def getFuelEconomyReport(request):
+    """
+        This will return a detailed Fuel Economy Report.  The result can be saved for
+        later pretty safely, as it won't change until the user inputs more data.
+    :param request: passed from django
+    :return: the report
+    """
+    #TODO: Don't return another unless the user has at least 3 gas stops
+    if not request.method == "GET":
+        return HttpResponse("Bad Method", status=400)
+
+    report = {'vehicle': models.Vehicle.objects.filter(owner=request.session.user)[:1], 'responseType': 'fuelEconomyReportResponse'}
+
+    total_gallons = total_miles = 0
+
+    for gasStop in models.GasStop.objects.filter(vehicle=report['vehicle']):
+        total_gallons += gasStop.fuel_purchased
+
+    total_miles = models.GasStop.objects.filter(vehicle=report['vehicle']).order_by('-odometer')[:1][0].odometer - \
+        models.GasStop.objects.filter(vehicle=report['vehicle']).order_by('odometer')[:1][0].odometer
+
+    report['average_mpg'] = "{0}".format(total_miles/total_gallons)
+
+    first_stop = models.GasStop.objects.filter(vehicle=report['vehicle']).order_by('odometer')[0].date
+    most_recent = models.GasStop.objects.filter(vehicle=report['vehicle']).order_by('-odometer')[0].date
+    print("First stop is {}, most recent is {}, total stops: {}".format(first_stop, most_recent, len(models.GasStop.objects.filter(vehicle=report['vehicle']))))
+    passed_time = most_recent - first_stop
+    print("After it")
+    report['frequency'] = "{}".format(len(models.GasStop.objects.filter(vehicle=report['vehicle']))/passed_time.days)
+
+    report['gasStops'] = util.makeArray(models.GasStop.objects.filter(vehicle__owner=request.session.user).order_by('-date')[:10])
+    report['vehicle'] = util.makeArray(report['vehicle'])
+
+    return HttpResponse(json.dumps(report))
