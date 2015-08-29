@@ -134,10 +134,9 @@ def getFuelEconomyReport(request):
 
     first_stop = models.GasStop.objects.filter(vehicle=report['vehicle']).order_by('odometer')[0].date
     most_recent = models.GasStop.objects.filter(vehicle=report['vehicle']).order_by('-odometer')[0].date
-    print("First stop is {}, most recent is {}, total stops: {}".format(first_stop, most_recent, len(models.GasStop.objects.filter(vehicle=report['vehicle']))))
+
     passed_time = most_recent - first_stop
-    print("After it")
-    report['frequency'] = "{}".format(len(models.GasStop.objects.filter(vehicle=report['vehicle']))/passed_time.days)
+    report['frequency'] = "{}".format(passed_time.days/len(models.GasStop.objects.filter(vehicle=report['vehicle'])))
 
     report['gasStops'] = util.makeArray(models.GasStop.objects.filter(vehicle__owner=request.session.user).order_by('-date')[:10])
     report['vehicle'] = util.makeArray(report['vehicle'])
