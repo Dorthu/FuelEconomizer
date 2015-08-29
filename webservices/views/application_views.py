@@ -120,7 +120,7 @@ def getFuelEconomyReport(request):
     if not request.method == "GET":
         return HttpResponse("Bad Method", status=400)
 
-    report = {'vehicle': models.Vehicle.objects.filter(owner=request.session.user)[:1], 'responseType': 'fuelEconomyReportResponse'}
+    report = {'vehicle': models.Vehicle.objects.filter(owner=request.session.user)[0], 'responseType': 'fuelEconomyReportResponse'}
 
     total_gallons = total_miles = 0
 
@@ -139,6 +139,6 @@ def getFuelEconomyReport(request):
     report['frequency'] = "{}".format(passed_time.days/len(models.GasStop.objects.filter(vehicle=report['vehicle'])))
 
     report['gasStops'] = util.makeArray(models.GasStop.objects.filter(vehicle__owner=request.session.user).order_by('-date')[:10])
-    report['vehicle'] = util.makeArray(report['vehicle'])
+    report['vehicle'] = report['vehicle'].toJSON()
 
     return HttpResponse(json.dumps(report))
