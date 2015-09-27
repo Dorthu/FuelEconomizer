@@ -124,11 +124,11 @@ def getFuelEconomyReport(request):
 
     total_gallons = total_miles = 0
 
-    for gasStop in models.GasStop.objects.filter(vehicle=report['vehicle']):
+    for gasStop in models.GasStop.objects.filter(vehicle=report['vehicle']).order_by('odometer')[1:]:
         total_gallons += gasStop.fuel_purchased
 
     total_miles = models.GasStop.objects.filter(vehicle=report['vehicle']).order_by('-odometer')[:1][0].odometer - \
-        models.GasStop.objects.filter(vehicle=report['vehicle']).order_by('odometer')[:1][0].odometer
+        models.GasStop.objects.filter(vehicle=report['vehicle']).order_by('odometer')[:2][0].odometer
 
     report['average_mpg'] = "{0}".format(total_miles/total_gallons)
 
