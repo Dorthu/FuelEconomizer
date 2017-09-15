@@ -15,7 +15,7 @@ def makeErrorResponse(errorMessage):
     return HttpResponse(json.dumps({
         'responseType': 'errorResponse',
         'errorMessage': errorMessage
-    }))
+    }), status=400)
 
 @requires_authentication
 def getVehicles(request):
@@ -72,16 +72,16 @@ def _addGasStop(request):
 
     # Let's make sure the data we got in is sane
     if float(gasStop.fuel_purchased) <= 0:
-        return  makeErrorResponse("Fuel Purchased must be a positive number"), status=400)
+        return  makeErrorResponse("Fuel Purchased must be a positive number")
 
     if float(gasStop.fuel_purchased) > 99:
-        return makeErrorResponse("Did you really buy more than 99 gallons of gas?"))
+        return makeErrorResponse("Did you really buy more than 99 gallons of gas?")
 
     if float(gasStop.price) <= 0:
-        return makeErrorResponse("Price must be a positive number"), status=400)
+        return makeErrorResponse("Price must be a positive number")
 
     if float(gasStop.odometer) <= 0:
-        return makeErrorResponse("Odometer reading must be a positive number"), status=400)
+        return makeErrorResponse("Odometer reading must be a positive number")
 
     # If this vehicle had a previous gas stop, make sure the odometer is incrementing - no turning it back
     prevGasStop = models.GasStop.objects.filter(vehicle=gasStop.vehicle,
@@ -91,7 +91,7 @@ def _addGasStop(request):
         prevGasStop = prevGasStop[0]
         return makeErrorResponse("Previous odometer "
                 "reading was "+str(prevGasStop.odometer)+" - you can't turn your "
-                "odometer back!"), status=400)
+                "odometer back!")
 
     # Everything checks out - let's do it!
     gasStop.save()
