@@ -1,0 +1,13 @@
+asgiref==3.4.1
+ConfigArgParse==0.11.0
+Django==3.2.6
+django-cors-headers==3.7.0
+django-crontab==0.7.1
+django-mysql==3.12.0
+Jinja2==2.8
+Markdown==2.6.6
+MarkupSafe==0.23
+mysqlclient==2.0.3
+PyGithub==1.26.0
+pytz==2021.1
+sqlparse==0.4.1

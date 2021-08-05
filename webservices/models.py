@@ -13,7 +13,7 @@ class Make(models.Model):
 class Model(models.Model):
     name = models.CharField(max_length=100)
     year = models.IntegerField()
-    make = models.ForeignKey(Make)
+    make = models.ForeignKey(Make, models.SET_NULL)
 
     def __str__(self):
         return str(self.year) + " " + str(self.make) + " " + self.name
@@ -41,7 +41,7 @@ class User(models.Model):
 
 class Session(models.Model):
     #User
-    user = models.ForeignKey(User)
+    user = models.ForeignKey(User, models.SET_NULL)
 
     #Login Info
     initial_login = models.DateTimeField(auto_now_add=True)
@@ -67,8 +67,8 @@ class Session(models.Model):
 #Vehicle Metadata
 class Vehicle(models.Model):
     #Associations
-    owner = models.ForeignKey(User)
-    model = models.ForeignKey(Model)
+    owner = models.ForeignKey(User, models.SET_NULL)
+    model = models.ForeignKey(Model, models.SET_NULL)
     default = models.BooleanField(default=False)
 
     def __str__(self):
@@ -87,7 +87,7 @@ class Vehicle(models.Model):
 # Fuel Usage Data
 class GasStop(models.Model):
     #Associations
-    vehicle = models.ForeignKey(Vehicle)
+    vehicle = models.ForeignKey(Vehicle, models.SET_NULL)
 
     #Implied Fields
     date = models.DateTimeField()
